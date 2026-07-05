@@ -10,6 +10,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface CoberturaMapper {
 
+    @Mapping(source = "municipio.id", target = "municipioId")
     @Mapping(source = "municipio.nombre", target = "nombreMunicipio")
     @Mapping(source = "municipio.departamento", target = "departamentoMunicipio")
     CoberturaDTO toCoberturaDto(Cobertura cobertura);

@@ -19,7 +19,7 @@ public class DataSeeder {
     @PostConstruct
     public void seed() {
         if (municipioRepository.count() == 0) {
-            String url = "https://www.datos.gov.co/resource/gdxc-w37w.json";
+            String url = "https://www.datos.gov.co/resource/gdxc-w37w.json?$limit=2000";
             System.out.println("Intentando cargar municipios desde la API correcta...");
 
             try {

@@ -2,6 +2,7 @@ package com.comunetmax.ms_cobertura.service;
 
 import com.comunetmax.ms_cobertura.dto.MunicipioDTO;
 import com.comunetmax.ms_cobertura.mapper.CoberturaMapper;
+import com.comunetmax.ms_cobertura.model.Municipio;
 import com.comunetmax.ms_cobertura.repository.MunicipioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,5 +19,12 @@ public class MunicipioService {
         return municipioRepository.findAll().stream()
                 .map(mapper::toMunicipioDto)
                 .collect(Collectors.toList());
+    }
+
+    public MunicipioDTO crear(String nombre, String departamento) {
+        Municipio m = new Municipio();
+        m.setNombre(nombre);
+        m.setDepartamento(departamento);
+        return mapper.toMunicipioDto(municipioRepository.save(m));
     }
 }

@@ -1,26 +1,28 @@
 package com.comunetmax.ms_gateway.filter;
 
 import com.comunetmax.ms_gateway.config.JwtUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 @Component
 public class AuthenticationFilter extends AbstractGatewayFilterFactory<AuthenticationFilter.Config> {
 
+    private static final Logger log = LoggerFactory.getLogger(AuthenticationFilter.class);
+
     @Autowired
-    private JwtUtil jwtUtil; // Necesitarás copiar una versión simple de JwtUtil aquí también para validar
+    private JwtUtil jwtUtil;
 
     public AuthenticationFilter() {
         super(Config.class);
@@ -32,8 +34,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
             ServerHttpRequest request = exchange.getRequest();
             String path = request.getURI().getPath();
 
-            // 1. Mantenemos tu Log
-            System.out.println("DEBUG: Petición recibida en: " + path);
+            log.debug("Petición recibida en: {}", path);
 
             // --- ESTA ES LA ÚNICA ADICIÓN ---
             // Si es documentación, salta directamente al final (chain.filter)
@@ -41,6 +42,11 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
                     path.contains("/swagger-ui") ||
                     path.contains("/swagger-resources") ||
                     path.contains("/webjars")) {
+                return chain.filter(exchange);
+            }
+
+            // Endpoints públicos para consultar cobertura y planes sin autenticación
+            if (isPublicPath(path)) {
                 return chain.filter(exchange);
             }
             // --------------------------------
@@ -68,6 +74,14 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 
             return chain.filter(exchange);
         };
+    }
+
+    private boolean isPublicPath(String path) {
+        return path.equals("/ms-cobertura/api/cobertura") ||
+               path.equals("/ms-cobertura/api/cobertura/") ||
+               path.equals("/ms-cobertura/api/cobertura/municipios") ||
+               path.startsWith("/ms-cobertura/api/cobertura/municipios/") ||
+               path.startsWith("/ms-planes/api/planes/municipio/");
     }
 
     private Mono<Void> onError(ServerWebExchange exchange, String message, HttpStatus httpStatus) {

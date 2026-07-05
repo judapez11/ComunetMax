@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 
-@FeignClient(name = "ms-cobertura", url = "http://comunet-cobertura:8084")
+@FeignClient(name = "ms-cobertura", url = "http://ms-cobertura:8080")
 public interface CoberturaClient {
 
     // Cambiamos MunicipioDTO por CoberturaDTO

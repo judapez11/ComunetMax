@@ -8,6 +8,7 @@ import com.comunetmax.ms_usuarios.model.Rol;
 import com.comunetmax.ms_usuarios.model.Usuario;
 import com.comunetmax.ms_usuarios.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -22,7 +23,8 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final PlanCliente planCliente;
     private final UsuarioMapper usuarioMapper;
-    private final JwtUtil jwtUtil; // <--- Inyectado aquí
+    private final JwtUtil jwtUtil;
+    private final PasswordEncoder passwordEncoder;
 
 
     public Map<String, String> login(Map<String, String> credentials) {
@@ -33,8 +35,7 @@ public class UsuarioService {
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        // 2. Comparamos la contraseña (por ahora texto plano, luego le pondremos BCrypt)
-        if (usuario.getPassword().equals(password)) {
+        if (passwordEncoder.matches(password, usuario.getPassword())) {
             String token = jwtUtil.generateToken(usuario.getEmail());
             Map<String, String> response = new HashMap<>();
             response.put("token", token);
@@ -58,6 +59,7 @@ public class UsuarioService {
         if (usuario.getRol() == null) {
             usuario.setRol(Rol.ADMIN);
         }
+        usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
         validarPlan(usuario.getPlanId());
         return usuarioRepository.save(usuario);
     }
@@ -71,6 +73,9 @@ public class UsuarioService {
                     usuario.setEmail(usuarioDetalles.getEmail());
                     usuario.setRol(usuarioDetalles.getRol());
                     usuario.setPlanId(usuarioDetalles.getPlanId());
+                    if (usuarioDetalles.getPassword() != null && !usuarioDetalles.getPassword().isEmpty()) {
+                        usuario.setPassword(passwordEncoder.encode(usuarioDetalles.getPassword()));
+                    }
                     return usuarioRepository.save(usuario);
                 })
                 .orElseThrow(() -> new RuntimeException("No se encontró el usuario con ID: " + id));

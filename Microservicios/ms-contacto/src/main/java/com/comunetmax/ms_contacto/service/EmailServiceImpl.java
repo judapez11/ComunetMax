@@ -4,6 +4,7 @@ import com.comunetmax.ms_contacto.dto.ContactoDTO;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -14,10 +15,13 @@ import org.thymeleaf.context.Context;
 public class EmailServiceImpl implements IEmailService {
 
     @Autowired
-    private JavaMailSender mailSender; // Faltaba esta línea para usar el servidor SMTP
+    private JavaMailSender mailSender;
 
     @Autowired
-    private TemplateEngine templateEngine; // Inyecta el motor de Thymeleaf
+    private TemplateEngine templateEngine;
+
+    @Value("${EMAIL_TO:perez@gmail.com}")
+    private String emailTo;
 
     @Override
     public void enviarCorreoContacto(ContactoDTO contacto) {
@@ -36,7 +40,7 @@ public class EmailServiceImpl implements IEmailService {
             // "email-template" debe coincidir con el nombre de tu archivo .html en resources/templates
             String htmlContent = templateEngine.process("email-template", context);
 
-            helper.setTo("perez@gmail.com"); // Cámbialo por tu correo real de prueba
+            helper.setTo(emailTo);
             helper.setSubject("Nuevo Contacto de: " + contacto.getNombre());
             helper.setText(htmlContent, true); // El 'true' activa el renderizado de HTML
 

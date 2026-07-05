@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # -----------------------------------------------------------------
   # 1. BASE DE DATOS (¡Ahora con Healthcheck!)
@@ -64,9 +62,10 @@ services:
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=password
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - JWT_SECRET=${JWT_SECRET:-MiClaveSecretaQueNadieDebeSaber12345678}
     depends_on:
       db-main:
-        condition: service_healthy # <--- CAMBIO IMPORTANTE
+        condition: service_healthy
     networks:
       - comunet-network
 
@@ -99,9 +98,14 @@ services:
     environment:
       - SPRING_CONFIG_IMPORT=optional:configserver:http://ms-config-server:8888
       - SPRING_APPLICATION_NAME=ms-contacto
+      - SPRING_MAIL_HOST=${SMTP_HOST:-smtp.gmail.com}
+      - SPRING_MAIL_PORT=${SMTP_PORT:-587}
+      - SPRING_MAIL_USERNAME=${SMTP_USER:-PONER_AQUI_CORREO_EMPRESARIAL}
+      - SPRING_MAIL_PASSWORD=${SMTP_PASS:-PONER_AQUI_APP_PASSWORD}
+      - EMAIL_TO=${EMAIL_TO:-perez@gmail.com}
     depends_on:
       ms-config-server:
-        condition: service_healthy # Este SÍ espera al Config Server
+        condition: service_healthy
     networks:
       - comunet-network
 
@@ -152,9 +156,11 @@ services:
     restart: always
     ports:
       - "8080:8080"
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-MiClaveSecretaQueNadieDebeSaber12345678}
     depends_on:
       ms-config-server:
-        condition: service_healthy # Este SÍ espera al Config Server
+        condition: service_healthy
     networks:
       - comunet-network
 

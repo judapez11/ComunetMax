@@ -2,14 +2,17 @@ package com.comunetmax.ms_gateway.config;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import java.security.Key;
 
 @Component
 public class JwtUtil {
-    // IMPORTANTE: Usa la misma lógica de llave que en Usuarios para que coincidan
-    private static final String SECRET_KEY = "MiClaveSecretaQueNadieDebeSaber12345678";
-    private final Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+    private final Key key;
+
+    public JwtUtil(@Value("${JWT_SECRET:MiClaveSecretaQueNadieDebeSaber12345678}") String secretKey) {
+        this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
+    }
 
     public boolean validateToken(String token) {
         try {
