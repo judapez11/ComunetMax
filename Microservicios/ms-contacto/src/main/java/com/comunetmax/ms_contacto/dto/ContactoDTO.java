@@ -26,4 +26,12 @@ public class ContactoDTO {
     @NotBlank(message = "El mensaje no puede estar vacío")
     @Size(min = 10, max = 500, message = "El mensaje debe tener entre 10 y 500 caracteres")
     private String mensaje;
+
+    private String tipo;
+
+    private String asunto;
+
+    private String plan;
+
+    private String municipio;
 }

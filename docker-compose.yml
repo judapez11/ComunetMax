@@ -58,7 +58,7 @@ services:
     #  - "8083:8080"
     environment:
       - SPRING_CLOUD_CONFIG_ENABLED=false
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://comunet-postgres:5432/db_usuarios
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://comunet-postgres:5432/comunet_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=password
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
@@ -78,7 +78,7 @@ services:
     #   - "8081:8080"
     environment:
       - SPRING_CLOUD_CONFIG_ENABLED=false
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://comunet-postgres:5432/db_planes
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://comunet-postgres:5432/comunet_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=password
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
@@ -118,7 +118,7 @@ services:
     #   - "8084:8080"
     environment:
       - SPRING_CLOUD_CONFIG_ENABLED=false
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://comunet-postgres:5432/db_cobertura
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://comunet-postgres:5432/comunet_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=password
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update

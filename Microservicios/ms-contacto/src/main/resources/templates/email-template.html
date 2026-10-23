@@ -14,6 +14,11 @@
         <h1>ComunetMax - Nuevo Contacto</h1>
     </div>
     <div class="content">
+        <p th:if="${tipo != null and tipo == 'PLANES'}"><strong>Formulario:</strong> Interes en Planes</p>
+        <p th:if="${tipo != null and tipo == 'PQR'}"><strong>Formulario:</strong> PQR - Quejas, Sugerencias y Reclamos</p>
+        <p th:if="${asunto != null}"><strong>Asunto:</strong> <span th:text="${asunto}"></span></p>
+        <p th:if="${plan != null}"><strong>Plan interesado:</strong> <span th:text="${plan}"></span></p>
+        <p th:if="${municipio != null}"><strong>Municipio:</strong> <span th:text="${municipio}"></span></p>
         <p><strong>Nombre:</strong> <span th:text="${nombre}"></span> <span th:text="${apellidos}"></span></p>
         <p><strong>Correo:</strong> <span th:text="${correo}"></span></p>
         <p><strong>Teléfono:</strong> <span th:text="${telefono}"></span></p>

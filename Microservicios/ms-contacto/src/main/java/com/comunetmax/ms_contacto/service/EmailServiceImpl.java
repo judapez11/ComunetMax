@@ -20,8 +20,14 @@ public class EmailServiceImpl implements IEmailService {
     @Autowired
     private TemplateEngine templateEngine;
 
-    @Value("${EMAIL_TO:perez@gmail.com}")
-    private String emailTo;
+    @Value("")
+    private String emailContacto;
+
+    @Value("")
+    private String emailPlanes;
+
+    @Value("")
+    private String emailPqr;
 
     @Override
     public void enviarCorreoContacto(ContactoDTO contacto) {
@@ -36,12 +42,39 @@ public class EmailServiceImpl implements IEmailService {
             context.setVariable("correo", contacto.getCorreoElectronico());
             context.setVariable("telefono", contacto.getTelefono());
             context.setVariable("mensaje", contacto.getMensaje());
+            context.setVariable("tipo", contacto.getTipo());
+            context.setVariable("asunto", contacto.getAsunto());
+            context.setVariable("plan", contacto.getPlan());
+            context.setVariable("municipio", contacto.getMunicipio());
+
+            // Subject y Destinatario según el tipo de formulario
+            String tipo = contacto.getTipo() == null ? "GENERAL" : contacto.getTipo().toUpperCase();
+            String subject;
+            String destinatario;
+
+            switch (tipo) {
+                case "PLANES":
+                    subject = "Interes en Planes - " + (contacto.getPlan() != null ? contacto.getPlan() : "") +
+                            (contacto.getMunicipio() != null ? " | " + contacto.getMunicipio() : "") +
+                            " | " + contacto.getNombre();
+                    destinatario = emailPlanes;
+                    break;
+                case "PQR":
+                    subject = "PQR: " + (contacto.getAsunto() != null ? contacto.getAsunto() : "Sin asunto") +
+                            " - " + contacto.getNombre();
+                    destinatario = emailPqr;
+                    break;
+                default:
+                    subject = "Nuevo Contacto de: " + contacto.getNombre();
+                    destinatario = emailContacto;
+                    break;
+            }
 
             // "email-template" debe coincidir con el nombre de tu archivo .html en resources/templates
             String htmlContent = templateEngine.process("email-template", context);
 
-            helper.setTo(emailTo);
-            helper.setSubject("Nuevo Contacto de: " + contacto.getNombre());
+            helper.setTo(destinatario);
+            helper.setSubject(subject);
             helper.setText(htmlContent, true); // El 'true' activa el renderizado de HTML
 
             mailSender.send(mimeMessage);

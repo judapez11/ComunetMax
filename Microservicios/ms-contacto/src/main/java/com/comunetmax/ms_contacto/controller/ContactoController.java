@@ -17,6 +17,22 @@ public class ContactoController {
 
     @PostMapping
     public ResponseEntity<String> enviarMensaje(@Valid @RequestBody ContactoDTO contacto) {
+        return procesar(contacto);
+    }
+
+    @PostMapping("/planes")
+    public ResponseEntity<String> enviarMensajePlanes(@Valid @RequestBody ContactoDTO contacto) {
+        contacto.setTipo("PLANES");
+        return procesar(contacto);
+    }
+
+    @PostMapping("/pqr")
+    public ResponseEntity<String> enviarMensajePqr(@Valid @RequestBody ContactoDTO contacto) {
+        contacto.setTipo("PQR");
+        return procesar(contacto);
+    }
+
+    private ResponseEntity<String> procesar(ContactoDTO contacto) {
         // Validación básica de campos obligatorios
         if (contacto.getNombre() == null || contacto.getNombre().isEmpty() ||
                 contacto.getCorreoElectronico() == null || contacto.getCorreoElectronico().isEmpty() ||
@@ -29,7 +45,7 @@ public class ContactoController {
         emailService.enviarCorreoContacto(contacto);
 
         // Logs de verificación
-        System.out.println("Mensaje recibido de: " + contacto.getNombre() + " " + contacto.getApellidos());
+        System.out.println("[" + (contacto.getTipo() == null ? "GENERAL" : contacto.getTipo()) + "] Mensaje recibido de: " + contacto.getNombre() + " " + contacto.getApellidos());
         System.out.println("Correo: " + contacto.getCorreoElectronico());
         System.out.println("Contenido: " + contacto.getMensaje());
 
