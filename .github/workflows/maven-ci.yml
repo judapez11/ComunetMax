@@ -7,44 +7,32 @@ on:
     branches: [ "main", "develop" ]
 
 jobs:
-  build-and-test:
+  build-and-compile:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - ms-config-server
+          - ms-gateway
+          - ms-usuarios
+          - ms-planes
+          - ms-cobertura
+          - ms-contacto
 
     steps:
       - name: Checkout del código
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Configurar Java 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: maven
 
-      # 1. MS-COBERTURA
-      - name: Compilar MS-Cobertura
+      - name: Validar compilación de ${{ matrix.service }}
         run: |
-          echo "Construyendo Cobertura..."
-          cd Microservicios/ms-cobertura
-          mvn clean package -DskipTests
-
-      # 2. MS-PLANES
-      - name: Compilar MS-Planes
-        run: |
-          echo "Construyendo Planes..."
-          cd Microservicios/ms-planes
-          mvn clean package -DskipTests
-
-      # 3. MS-USUARIOS
-      - name: Compilar MS-Usuarios
-        run: |
-          echo "Construyendo Usuarios..."
-          cd Microservicios/ms-usuarios
-          mvn clean package -DskipTests
-
-      # 4. MS-CONTACTO
-      - name: Compilar MS-Contacto
-        run: |
-          echo "Construyendo Contacto..."
-          cd Microservicios/ms-contacto
-          mvn clean package -DskipTests
+          echo "Compilando ${{ matrix.service }}..."
+          cd Microservicios/${{ matrix.service }}
+          mvn clean compile -DskipTests
