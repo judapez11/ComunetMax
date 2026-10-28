@@ -1,6 +1,6 @@
 services:
   # -----------------------------------------------------------------
-  # 1. BASE DE DATOS (¡Ahora con Healthcheck!)
+  # 1. BASE DE DATOS
   # -----------------------------------------------------------------
   db-main:
     container_name: comunet-postgres
@@ -17,21 +17,22 @@ services:
       - ./postgres-init:/docker-entrypoint-initdb.d
     networks:
       - comunet-network
-    # ESTO ES LO NUEVO QUE NECESITAS:
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 40s # Le da tiempo a tu PC de despertar
+      start_period: 40s
+
 
   # -----------------------------------------------------------------
-  # 2. PGADMIN
+  # 2. PGADMIN (Perfil opcional: solo arranca con --profile tools up)
   # -----------------------------------------------------------------
   pgadmin:
     container_name: comunet-pgadmin
     image: dpage/pgadmin4
     restart: always
+    profiles: ["tools"]
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@comunet.com
       PGADMIN_DEFAULT_PASSWORD: root
@@ -41,22 +42,21 @@ services:
       - pgadmin_data:/var/lib/pgadmin
     depends_on:
       db-main:
-        condition: service_healthy # Espera a que la DB esté lista
+        condition: service_healthy
     networks:
       - comunet-network
 
   # -----------------------------------------------------------------
-  # 3. MICROSERVICIOS
+  # 3. MICROSERVICIOS (Optimizados con límites de memoria JVM)
   # -----------------------------------------------------------------
 
-  # --- MS USUARIOS (Solo necesita DB) ---
+  # --- MS USUARIOS ---
   ms-usuarios:
     build: ./Microservicios/ms-usuarios
     container_name: comunet-usuarios
     restart: always
-    # ports:
-    #  - "8083:8080"
     environment:
+      - JAVA_TOOL_OPTIONS=-Xms64m -Xmx160m -XX:+UseSerialGC
       - SPRING_CLOUD_CONFIG_ENABLED=false
       - SPRING_DATASOURCE_URL=jdbc:postgresql://comunet-postgres:5432/comunet_db
       - SPRING_DATASOURCE_USERNAME=postgres
@@ -69,14 +69,13 @@ services:
     networks:
       - comunet-network
 
-  # --- MS PLANES (Solo necesita DB) ---
+  # --- MS PLANES ---
   ms-planes:
     build: ./Microservicios/ms-planes
     container_name: comunet-planes
     restart: always
-    # ports:
-    #   - "8081:8080"
     environment:
+      - JAVA_TOOL_OPTIONS=-Xms64m -Xmx160m -XX:+UseSerialGC
       - SPRING_CLOUD_CONFIG_ENABLED=false
       - SPRING_DATASOURCE_URL=jdbc:postgresql://comunet-postgres:5432/comunet_db
       - SPRING_DATASOURCE_USERNAME=postgres
@@ -84,18 +83,17 @@ services:
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     depends_on:
       db-main:
-        condition: service_healthy # <--- CAMBIO IMPORTANTE
+        condition: service_healthy
     networks:
       - comunet-network
 
-  # --- MS CONTACTO (Necesita Config Server) ---
+  # --- MS CONTACTO ---
   ms-contacto:
     build: ./Microservicios/ms-contacto
     container_name: comunet-contacto
     restart: always
-    # ports:
-    #   - "8082:8080"
     environment:
+      - JAVA_TOOL_OPTIONS=-Xms64m -Xmx160m -XX:+UseSerialGC
       - SPRING_CONFIG_IMPORT=optional:configserver:http://ms-config-server:8888
       - SPRING_APPLICATION_NAME=ms-contacto
       - SPRING_MAIL_HOST=${SMTP_HOST:-smtp.gmail.com}
@@ -103,20 +101,22 @@ services:
       - SPRING_MAIL_USERNAME=${SMTP_USER:-PONER_AQUI_CORREO_EMPRESARIAL}
       - SPRING_MAIL_PASSWORD=${SMTP_PASS:-PONER_AQUI_APP_PASSWORD}
       - EMAIL_TO=${EMAIL_TO:-perez@gmail.com}
+      - EMAIL_TO_CONTACTO=${EMAIL_TO_CONTACTO:-contacto@comunetmax.com}
+      - EMAIL_TO_PLANES=${EMAIL_TO_PLANES:-ventas@comunetmax.com}
+      - EMAIL_TO_PQR=${EMAIL_TO_PQR:-pqr@comunetmax.com}
     depends_on:
       ms-config-server:
         condition: service_healthy
     networks:
       - comunet-network
 
-  # --- MS COBERTURA (Solo necesita DB) ---
+  # --- MS COBERTURA ---
   ms-cobertura:
     build: ./Microservicios/ms-cobertura
     container_name: comunet-cobertura
     restart: always
-    # ports:
-    #   - "8084:8080"
     environment:
+      - JAVA_TOOL_OPTIONS=-Xms64m -Xmx160m -XX:+UseSerialGC
       - SPRING_CLOUD_CONFIG_ENABLED=false
       - SPRING_DATASOURCE_URL=jdbc:postgresql://comunet-postgres:5432/comunet_db
       - SPRING_DATASOURCE_USERNAME=postgres
@@ -124,7 +124,7 @@ services:
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     depends_on:
       db-main:
-        condition: service_healthy # <--- CAMBIO IMPORTANTE
+        condition: service_healthy
     networks:
       - comunet-network
 
@@ -136,6 +136,7 @@ services:
     ports:
       - "8888:8888"
     environment:
+      - JAVA_TOOL_OPTIONS=-Xms64m -Xmx140m -XX:+UseSerialGC
       - SPRING_PROFILES_ACTIVE=native
       - SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCH_LOCATIONS=file:/config/
     volumes:
@@ -149,7 +150,7 @@ services:
       retries: 5
       start_period: 40s
 
-  # --- GATEWAY (Necesita Config Server) ---
+  # --- GATEWAY ---
   ms-gateway:
     build: ./Microservicios/ms-gateway
     container_name: comunet-gateway
@@ -157,6 +158,7 @@ services:
     ports:
       - "8080:8080"
     environment:
+      - JAVA_TOOL_OPTIONS=-Xms64m -Xmx160m -XX:+UseSerialGC
       - JWT_SECRET=${JWT_SECRET:-MiClaveSecretaQueNadieDebeSaber12345678}
     depends_on:
       ms-config-server:
