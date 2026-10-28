@@ -24,6 +24,7 @@ services:
       retries: 5
       start_period: 40s
 
+
   # -----------------------------------------------------------------
   # 2. PGADMIN (Perfil opcional: solo arranca con --profile tools up)
   # -----------------------------------------------------------------
